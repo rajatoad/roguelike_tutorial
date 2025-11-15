@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EntityDefinition" load_steps=6 format=3 uid="uid://mmvilq3nibjt"]
+
+[ext_resource type="Script" uid="uid://lg8nivuq53pq" path="res://src/Entities/entity_definition.gd" id="1_c3htw"]
+[ext_resource type="Script" uid="uid://bywgry00vyjin" path="res://src/Entities/Actors/Components/ComponentDefinitions/fighter_component_definition.gd" id="1_ierbf"]
+[ext_resource type="Texture2D" uid="uid://chgvxqjl7omrq" path="res://monochrome_packed.png" id="2_mmy2x"]
+
+[sub_resource type="Resource" id="Resource_fvalm"]
+script = ExtResource("1_ierbf")
+max_hp = 10
+power = 3
+metadata/_custom_type_script = "uid://bywgry00vyjin"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ierbf"]
+atlas = ExtResource("2_mmy2x")
+region = Rect2(384, 32, 16, 16)
+
+[resource]
+script = ExtResource("1_c3htw")
+name = "Priest"
+texture = SubResource("AtlasTexture_ierbf")
+color = Color(0.7279944, 0.71110034, 0, 1)
+fighter_definition = SubResource("Resource_fvalm")
+ai_type = 1
+metadata/_custom_type_script = "uid://lg8nivuq53pq"

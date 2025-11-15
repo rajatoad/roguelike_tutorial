@@ -1,5 +1,10 @@
 class_name DungeonGenerator extends Node
 
+const entity_types = {
+	"priest" : preload("res://assets/definitions/entities/actors/entity_definition_priest.tres"),
+	"crusader" : preload("res://assets/definitions/entities/actors/entity_definition_crusader.tres")
+}
+
 @export_category("Map Dimensions")
 @export var map_width: int = 80
 @export var map_height: int = 45
@@ -9,6 +14,8 @@ class_name DungeonGenerator extends Node
 @export var room_max_size: int = 10
 @export var room_min_size: int = 6
 
+@export_category("Monsters RNG")
+@export var max_monsters_per_room = 2
 
 
 var _rng := RandomNumberGenerator.new()
@@ -48,8 +55,8 @@ func _tunnel_between(dungeon: MapData, start: Vector2i, end: Vector2i) -> void:
 		_tunnel_horizontal(dungeon, end.y, start.x, end.x)
 
 func generate_dungeon(player: Entity) -> MapData:
-	var dungeon := MapData.new(map_width, map_height)
-	
+	var dungeon := MapData.new(map_width, map_height, player)
+	dungeon.entities.append(player)
 	var rooms: Array[Rect2i] = []
 	
 	for _try_room in max_rooms:
@@ -74,9 +81,34 @@ func generate_dungeon(player: Entity) -> MapData:
 		
 		if rooms.is_empty():
 			player.grid_position = new_room.get_center()
+			player.map_data = dungeon
 		else:
 			_tunnel_between(dungeon, rooms.back().get_center(), new_room.get_center())
-
+		
+		_place_entities(dungeon, new_room)
 		rooms.append(new_room)
 	
+	dungeon.setup_pathfinding()
 	return dungeon
+
+func _place_entities(dungeon: MapData, room: Rect2i) -> void:
+	var number_of_monsters: int = _rng.randi_range(0, max_monsters_per_room)
+	
+	for _i in number_of_monsters:
+		var x: int = _rng.randi_range(room.position.x + 1, room.end.x - 1)
+		var y: int = _rng.randi_range(room.position.y + 1, room.end.y - 1)
+		var new_entity_position := Vector2i(x, y)
+		
+		var can_place = true
+		for entity in dungeon.entities:
+			if entity.grid_position == new_entity_position:
+				can_place = false
+				break
+		
+		if can_place:
+			var new_entity: Entity
+			if _rng.randf() < 0.8:
+				new_entity = Entity.new(dungeon, new_entity_position, entity_types.priest)
+			else:
+				new_entity = Entity.new(dungeon, new_entity_position, entity_types.crusader)
+			dungeon.entities.append(new_entity)

@@ -3,29 +3,31 @@ class_name Game extends Node2D
 const player_definition : EntityDefinition = preload("res://assets/definitions/entities/actors/entity_definition_player.tres")
 
 @onready var player: Entity
-@onready var event_handler: EventHandler = $EventHandler
-@onready var entities: Node2D = $Entities
-@onready var map: Node2D = $Map
+@onready var input_handler: InputHandler = $InputHandler
+@onready var map: Map = $Map
+@onready var camera: Camera2D = $Camera2D
 
 
 func _ready() -> void:
-	player = Entity.new(Vector2i.ZERO, player_definition)
-	var camera: Camera2D = $Camera2D
+	player = Entity.new(null, Vector2i.ZERO, player_definition)
 	remove_child(camera)
 	player.add_child(camera)
-	entities.add_child(player)
 	map.generate(player)
-	#var player_start_pos: Vector2i = Grid.world_to_grid(get_viewport_rect().size.floor() / 2)
-	#player = Entity.new(player_start_pos, player_definition)
-	#entities.add_child(player)
-	#var npc := Entity.new(player_start_pos + Vector2i.RIGHT, player_definition)
-	#npc.modulate = Color.ORANGE_RED
-	#entities.add_child(npc)
+	map.update_fov(player.grid_position)
 
 func get_map_data() -> MapData:
 	return map.map_data
 
 func _physics_process(_delta: float) -> void:
-	var action: Action = event_handler.get_action()
+	var action: Action = input_handler.get_action(player)
 	if action:
-		action.perform(self, player)
+		#var previous_player_position: Vector2i = player.grid_position
+		action.perform()
+		_handle_enemy_turns()
+		#if player.grid_position != previous_player_position:
+		map.update_fov(player.grid_position)
+
+func _handle_enemy_turns() -> void:
+	for entity in get_map_data().get_actors():
+		if entity.is_alive() and entity != player:
+			entity.ai_component.perform()
