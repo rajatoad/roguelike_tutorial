@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://ck14l834cdmrh"]
+[gd_scene load_steps=20 format=3 uid="uid://ck14l834cdmrh"]
 
 [ext_resource type="Script" uid="uid://drntbwo6xfkst" path="res://src/Game/game.gd" id="1_k6qo2"]
 [ext_resource type="Script" uid="uid://c43slbughrssh" path="res://src/Game/EventHandlers/input_handler.gd" id="2_7m6cs"]
@@ -7,9 +7,12 @@
 [ext_resource type="Script" uid="uid://batm0rnyr6b82" path="res://src/Map/dungeon_generator.gd" id="4_bob6j"]
 [ext_resource type="Script" uid="uid://dihw6gqhskh3g" path="res://src/Game/EventHandlers/game_over_input_handler.gd" id="4_le6wr"]
 [ext_resource type="Script" uid="uid://cbdn66r6h1k7h" path="res://src/Map/field_of_view.gd" id="5_3s8ir"]
+[ext_resource type="Script" uid="uid://dxjv5cdll50h6" path="res://src/Game/EventHandlers/history_viewer_input_handler.gd" id="5_drysr"]
 [ext_resource type="Texture2D" uid="uid://chgvxqjl7omrq" path="res://monochrome_packed.png" id="8_lx5th"]
+[ext_resource type="Script" uid="uid://dc3tct8apvg4k" path="res://src/GUI/mouseover_checker.gd" id="9_4te78"]
 [ext_resource type="Script" uid="uid://80fjybi12gv7" path="res://src/GUI/hp_display.gd" id="9_mkl7w"]
 [ext_resource type="FontFile" uid="uid://b5cqfn3c7jmg2" path="res://Fonts/Kenney Pixel.ttf" id="10_drysr"]
+[ext_resource type="Script" uid="uid://cjywd02solwt0" path="res://src/GUI/message_log.gd" id="12_ysswf"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0qd4d"]
 atlas = ExtResource("8_lx5th")
@@ -37,6 +40,9 @@ font = ExtResource("10_drysr")
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="LabelSettings" id="LabelSettings_4te78"]
+font = ExtResource("10_drysr")
+
 [node name="InterfaceRoot" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -61,8 +67,10 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="VBoxContainer/SubViewportContainer"]
 disable_3d = true
+handle_input_locally = false
 canvas_item_default_texture_filter = 0
 size = Vector2i(1152, 536)
+render_target_update_mode = 4
 
 [node name="Game" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
 script = ExtResource("1_k6qo2")
@@ -77,6 +85,11 @@ script = ExtResource("3_sag4g")
 [node name="GameOverInputHandler" type="Node" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/InputHandler"]
 script = ExtResource("4_le6wr")
 
+[node name="HistoryViewerInputHandler" type="Node" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/InputHandler"]
+script = ExtResource("5_drysr")
+messages_panel_path = NodePath("../../../../../InfoBar/MessagesPanel")
+message_log_path = NodePath("../../../../../InfoBar/MessagesPanel/MessageLog")
+
 [node name="Map" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game"]
 script = ExtResource("3_bob6j")
 
@@ -89,6 +102,9 @@ script = ExtResource("5_3s8ir")
 [node name="Tiles" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/Map"]
 
 [node name="Entities" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/Map"]
+
+[node name="MouseoverChecker" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/Map"]
+script = ExtResource("9_4te78")
 
 [node name="Camera2D" type="Camera2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game"]
 zoom = Vector2(2, 2)
@@ -124,10 +140,27 @@ layout_mode = 2
 size_flags_horizontal = 4
 label_settings = SubResource("LabelSettings_x8pff")
 
+[node name="MouseoverLabel" type="Label" parent="VBoxContainer/InfoBar/StatsPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 10
+label_settings = SubResource("LabelSettings_4te78")
+
 [node name="MessagesPanel" type="PanelContainer" parent="VBoxContainer/InfoBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_mkl7w")
 
+[node name="MessageLog" type="ScrollContainer" parent="VBoxContainer/InfoBar/MessagesPanel"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+script = ExtResource("12_ysswf")
+
+[node name="MessageList" type="VBoxContainer" parent="VBoxContainer/InfoBar/MessagesPanel/MessageLog"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
 [connection signal="player_created" from="VBoxContainer/SubViewportContainer/SubViewport/Game" to="VBoxContainer/InfoBar/StatsPanel/VBoxContainer/HpDisplay" method="initialize"]
+[connection signal="entities_focussed" from="VBoxContainer/SubViewportContainer/SubViewport/Game/Map/MouseoverChecker" to="VBoxContainer/InfoBar/StatsPanel/VBoxContainer/MouseoverLabel" method="set_text"]
