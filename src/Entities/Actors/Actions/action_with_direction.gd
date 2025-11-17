@@ -6,9 +6,6 @@ func _init(entity: Entity, dx: int, dy: int) -> void:
 	super._init(entity)
 	offset = Vector2i(dx, dy)
 
-func perform() -> void:
-	pass
-
 func get_destination() -> Vector2i:
 	return entity.grid_position + offset
 

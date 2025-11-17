@@ -1,4 +1,5 @@
 class_name EscapeAction extends Action
 
-func perform() -> void:
+func perform() -> bool:
 	entity.get_tree().quit()
+	return false

@@ -22,6 +22,7 @@ func update_fov(player_position: Vector2i) -> void:
 
 func generate(player: Entity) -> void:
 	map_data = dungeon_generator.generate_dungeon(player)
+	map_data.entity_placed.connect(entities.add_child)
 	_place_tiles()
 	_place_entities()
 

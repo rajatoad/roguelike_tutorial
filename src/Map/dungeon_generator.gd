@@ -2,7 +2,8 @@ class_name DungeonGenerator extends Node
 
 const entity_types = {
 	"priest" : preload("res://assets/definitions/entities/actors/entity_definition_priest.tres"),
-	"crusader" : preload("res://assets/definitions/entities/actors/entity_definition_crusader.tres")
+	"crusader" : preload("res://assets/definitions/entities/actors/entity_definition_crusader.tres"),
+	"health_potion" : preload("res://assets/definitions/entities/items/health_potion_definition.tres")
 }
 
 @export_category("Map Dimensions")
@@ -14,8 +15,9 @@ const entity_types = {
 @export var room_max_size: int = 10
 @export var room_min_size: int = 6
 
-@export_category("Monsters RNG")
-@export var max_monsters_per_room = 2
+@export_category("Entities RNG")
+@export var max_monsters_per_room: int = 2
+@export var max_items_per_room:int = 2
 
 
 var _rng := RandomNumberGenerator.new()
@@ -93,6 +95,8 @@ func generate_dungeon(player: Entity) -> MapData:
 
 func _place_entities(dungeon: MapData, room: Rect2i) -> void:
 	var number_of_monsters: int = _rng.randi_range(0, max_monsters_per_room)
+	var number_of_items: int = _rng.randi_range(0, max_items_per_room)
+
 	
 	for _i in number_of_monsters:
 		var x: int = _rng.randi_range(room.position.x + 1, room.end.x - 1)
@@ -111,4 +115,19 @@ func _place_entities(dungeon: MapData, room: Rect2i) -> void:
 				new_entity = Entity.new(dungeon, new_entity_position, entity_types.priest)
 			else:
 				new_entity = Entity.new(dungeon, new_entity_position, entity_types.crusader)
+			dungeon.entities.append(new_entity)
+
+	for _i in number_of_items:
+		var x: int = _rng.randi_range(room.position.x + 1, room.end.x - 1)
+		var y: int = _rng.randi_range(room.position.y + 1, room.end.y - 1)
+		var new_entity_position := Vector2i(x, y)
+		
+		var can_place = true
+		for entity in dungeon.entities:
+			if entity.grid_position == new_entity_position:
+				can_place = false
+				break
+		
+		if can_place:
+			var new_entity: Entity = Entity.new(dungeon, new_entity_position, entity_types.health_potion)
 			dungeon.entities.append(new_entity)
