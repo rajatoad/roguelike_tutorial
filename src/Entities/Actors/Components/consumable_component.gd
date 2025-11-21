@@ -8,3 +8,11 @@ func get_action(consumer: Entity) -> Action:
 
 func activate(action: ItemAction) -> bool:
 	return false
+
+func consume(consumer: Entity) -> void:
+	var inventory: InventoryComponent = consumer.inventory_component
+	inventory.items.erase(entity)
+	entity.queue_free()
+
+func get_targeting_radius() -> int:
+	return -1

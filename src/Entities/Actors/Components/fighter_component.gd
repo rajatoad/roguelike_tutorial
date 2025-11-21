@@ -8,7 +8,11 @@ var hp: int:
 		hp = clampi(value, 0, max_hp)
 		hp_changed.emit(hp, max_hp)
 		if hp <= 0:
-			die()
+			var die_silently := false
+			if not is_inside_tree():
+				die_silently = true
+				await ready
+			die(not die_silently)
 var defense: int
 var power: int
 
@@ -40,7 +44,7 @@ func heal(amount: int) -> int:
 func take_damage(amount: int) -> void:
 	hp -= amount
 
-func die() -> void:
+func die(log_message := true) -> void:
 	var death_message: String
 	var death_message_color: Color
 	
@@ -52,6 +56,9 @@ func die() -> void:
 		death_message = "%s is dead!" % entity.get_entity_name()
 		death_message_color = GameColors.ENEMY_DIE
 	
+	if log_message:
+		MessageLog.send_message(death_message, death_message_color)
+	
 	MessageLog.send_message(death_message, death_message_color)
 	entity.texture = death_texture
 	entity.modulate = death_color
@@ -61,3 +68,17 @@ func die() -> void:
 	entity.blocks_movement = false
 	get_map_data().unregister_blocking_entity(entity)
 	entity.type = Entity.EntityType.CORPSE
+
+func get_save_data() -> Dictionary:
+	return {
+		"max_hp": max_hp,
+		"hp": hp,
+		"power": power,
+		"defense": defense
+	}
+
+func restore(save_data: Dictionary) -> void:
+	max_hp = save_data["max_hp"]
+	hp = save_data["hp"]
+	power = save_data["power"]
+	defense = save_data["defense"]

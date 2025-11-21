@@ -1,5 +1,6 @@
-[gd_scene load_steps=20 format=3 uid="uid://ck14l834cdmrh"]
+[gd_scene load_steps=23 format=3 uid="uid://ck14l834cdmrh"]
 
+[ext_resource type="Script" uid="uid://dp38lq5pdu7ur" path="res://src/Game/game_root.gd" id="1_adbi8"]
 [ext_resource type="Script" uid="uid://drntbwo6xfkst" path="res://src/Game/game.gd" id="1_k6qo2"]
 [ext_resource type="Script" uid="uid://c43slbughrssh" path="res://src/Game/EventHandlers/input_handler.gd" id="2_7m6cs"]
 [ext_resource type="Script" uid="uid://dlj5oi8li5clw" path="res://src/Map/map.gd" id="3_bob6j"]
@@ -8,10 +9,12 @@
 [ext_resource type="Script" uid="uid://dihw6gqhskh3g" path="res://src/Game/EventHandlers/game_over_input_handler.gd" id="4_le6wr"]
 [ext_resource type="Script" uid="uid://cbdn66r6h1k7h" path="res://src/Map/field_of_view.gd" id="5_3s8ir"]
 [ext_resource type="Script" uid="uid://dxjv5cdll50h6" path="res://src/Game/EventHandlers/history_viewer_input_handler.gd" id="5_drysr"]
+[ext_resource type="Script" uid="uid://cw76vtgwgel40" path="res://src/Game/EventHandlers/base_input_handler.gd" id="6_x8pff"]
 [ext_resource type="Texture2D" uid="uid://chgvxqjl7omrq" path="res://monochrome_packed.png" id="8_lx5th"]
 [ext_resource type="Script" uid="uid://dc3tct8apvg4k" path="res://src/GUI/mouseover_checker.gd" id="9_4te78"]
 [ext_resource type="Script" uid="uid://80fjybi12gv7" path="res://src/GUI/hp_display.gd" id="9_mkl7w"]
 [ext_resource type="FontFile" uid="uid://b5cqfn3c7jmg2" path="res://Fonts/Kenney Pixel.ttf" id="10_drysr"]
+[ext_resource type="PackedScene" uid="uid://cbd0mt06514tg" path="res://src/GUI/Reticle/reticle.tscn" id="11_muykf"]
 [ext_resource type="Script" uid="uid://cjywd02solwt0" path="res://src/GUI/message_log.gd" id="12_ysswf"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0qd4d"]
@@ -50,6 +53,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_adbi8")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -73,14 +77,16 @@ size = Vector2i(1152, 536)
 render_target_update_mode = 4
 
 [node name="Game" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport"]
+unique_name_in_owner = true
 script = ExtResource("1_k6qo2")
 
 [node name="InputHandler" type="Node" parent="VBoxContainer/SubViewportContainer/SubViewport/Game"]
 script = ExtResource("2_7m6cs")
 metadata/_custom_type_script = "uid://c43slbughrssh"
 
-[node name="MainGameInputHandler" type="Node" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/InputHandler"]
+[node name="MainGameInputHandler" type="Node" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/InputHandler" node_paths=PackedStringArray("reticle")]
 script = ExtResource("3_sag4g")
+reticle = NodePath("../../Map/Reticle")
 
 [node name="GameOverInputHandler" type="Node" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/InputHandler"]
 script = ExtResource("4_le6wr")
@@ -89,6 +95,9 @@ script = ExtResource("4_le6wr")
 script = ExtResource("5_drysr")
 messages_panel_path = NodePath("../../../../../InfoBar/MessagesPanel")
 message_log_path = NodePath("../../../../../InfoBar/MessagesPanel/MessageLog")
+
+[node name="DummyInputHandler" type="Node" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/InputHandler"]
+script = ExtResource("6_x8pff")
 
 [node name="Map" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game"]
 script = ExtResource("3_bob6j")
@@ -105,6 +114,8 @@ script = ExtResource("5_3s8ir")
 
 [node name="MouseoverChecker" type="Node2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/Map"]
 script = ExtResource("9_4te78")
+
+[node name="Reticle" parent="VBoxContainer/SubViewportContainer/SubViewport/Game/Map" instance=ExtResource("11_muykf")]
 
 [node name="Camera2D" type="Camera2D" parent="VBoxContainer/SubViewportContainer/SubViewport/Game"]
 zoom = Vector2(2, 2)

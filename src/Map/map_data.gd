@@ -2,11 +2,6 @@ class_name MapData extends RefCounted
 
 signal entity_placed(entity)
 
-const tile_types = {
-	"floor": preload("res://assets/definitions/tiles/tile_definition_floor.tres"),
-	"wall": preload("res://assets/definitions/tiles/tile_definition_wall.tres")
-}
-
 const entity_pathfinding_weight = 10.0
 
 var width: int
@@ -28,7 +23,7 @@ func _setup_tiles() -> void:
 	for y in height:
 		for x in width:
 			var tile_position := Vector2i(x, y)
-			var tile := Tile.new(tile_position, tile_types.wall)
+			var tile := Tile.new(tile_position, "wall")
 			tiles.append(tile)
 
 
@@ -88,7 +83,7 @@ func get_actors() -> Array[Entity]:
 			actors.append(entity)
 	return actors
 
-func get_actors_at_location(location: Vector2i) -> Entity:
+func get_actor_at_location(location: Vector2i) -> Entity:
 	for actor in get_actors():
 		if actor.grid_position == location:
 			return actor
