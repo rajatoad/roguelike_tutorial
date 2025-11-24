@@ -1,14 +1,6 @@
 class_name DungeonGenerator extends Node
 
-const entity_types = {
-	"priest" : preload("res://assets/definitions/entities/actors/entity_definition_priest.tres"),
-	"crusader" : preload("res://assets/definitions/entities/actors/entity_definition_crusader.tres"),
-	"health_potion" : preload("res://assets/definitions/entities/items/health_potion_definition.tres"),
-	"lightning_scroll": preload("res://assets/definitions/entities/items/lightning_scroll_definition.tres"),
-	"confusion_scroll": preload("res://assets/definitions/entities/items/confusion_scroll_definition.tres"),
-	"fireball_scroll": preload("res://assets/definitions/entities/items/fireball_scroll_definition.tres"),
 
-}
 
 @export_category("Map Dimensions")
 @export var map_width: int = 80
@@ -19,9 +11,31 @@ const entity_types = {
 @export var room_max_size: int = 10
 @export var room_min_size: int = 6
 
-@export_category("Entities RNG")
-@export var max_monsters_per_room: int = 2
-@export var max_items_per_room:int = 2
+#@export_category("Entities RNG")
+const max_items_by_floor = [
+	[1, 1],
+	[4, 2]
+]
+
+const max_monsters_by_floor = [
+	[1, 2],
+	[4, 3],
+	[6, 5]
+]
+
+const item_chances = {
+	0: {"health_potion": 35},
+	2: {"confusion_scroll": 10},
+	4: {"lightning_scroll": 25, "sword": 5},
+	6: {"fireball_scroll": 25, "chainmail": 15},
+}
+
+const enemy_chances = {
+	0: {"priest": 80},
+	3: {"crusader": 15},
+	5: {"crusader": 30},
+	7: {"crusader": 60}
+}
 
 
 var _rng := RandomNumberGenerator.new()
@@ -60,30 +74,33 @@ func _tunnel_between(dungeon: MapData, start: Vector2i, end: Vector2i) -> void:
 		_tunnel_vertical(dungeon, start.x, start.y, end.y)
 		_tunnel_horizontal(dungeon, end.y, start.x, end.x)
 
-func generate_dungeon(player: Entity) -> MapData:
+func generate_dungeon(player: Entity, current_floor: int) -> MapData:
 	var dungeon := MapData.new(map_width, map_height, player)
+	dungeon.current_floor = current_floor
 	dungeon.entities.append(player)
+	
 	var rooms: Array[Rect2i] = []
+	var center_last_room: Vector2i
 	
 	for _try_room in max_rooms:
 		var room_width: int = _rng.randi_range(room_min_size, room_max_size)
 		var room_height: int = _rng.randi_range(room_min_size, room_max_size)
 		
 		var x: int = _rng.randi_range(0, dungeon.width - room_width - 1)
-		var y: int = _rng.randi_range(0, dungeon.height - room_height -1)
+		var y: int = _rng.randi_range(0, dungeon.height - room_height - 1)
 		
 		var new_room := Rect2i(x, y, room_width, room_height)
 		
-		var has_intersection := false
+		var has_intersections := false
 		for room in rooms:
-			# Rect2i.intersects() checks for overlapping points in order to allow bordering rooms one room is shrunk
-			if room.intersects(new_room.grow(-1)):
-				has_intersection = true
+			if room.intersects(new_room):
+				has_intersections = true
 				break
-		if has_intersection:
+		if has_intersections:
 			continue
 		
 		_carve_room(dungeon, new_room)
+		center_last_room = new_room.get_center()
 		
 		if rooms.is_empty():
 			player.grid_position = new_room.get_center()
@@ -91,18 +108,29 @@ func generate_dungeon(player: Entity) -> MapData:
 		else:
 			_tunnel_between(dungeon, rooms.back().get_center(), new_room.get_center())
 		
-		_place_entities(dungeon, new_room)
+		_place_entities(dungeon, new_room, current_floor)
+		
 		rooms.append(new_room)
+	
+	dungeon.down_stairs_location = center_last_room
+	var down_tile: Tile = dungeon.get_tile(center_last_room)
+	down_tile.set_tile_type("down_stairs")
 	
 	dungeon.setup_pathfinding()
 	return dungeon
 
-func _place_entities(dungeon: MapData, room: Rect2i) -> void:
+func _place_entities(dungeon: MapData, room: Rect2i, current_floor: int) -> void:
+	var max_monsters_per_room: int = _get_max_value_for_floor(max_monsters_by_floor, current_floor)
+	var max_items_per_room: int = _get_max_value_for_floor(max_items_by_floor, current_floor)
 	var number_of_monsters: int = _rng.randi_range(0, max_monsters_per_room)
 	var number_of_items: int = _rng.randi_range(0, max_items_per_room)
-
 	
-	for _i in number_of_monsters:
+	var monsters: Array[String] = _get_entities_at_random(enemy_chances, number_of_monsters, current_floor)
+	var items: Array[String] = _get_entities_at_random(item_chances, number_of_items, current_floor)
+	
+	var entity_keys: Array[String] = monsters + items
+	
+	for entity_key in entity_keys:
 		var x: int = _rng.randi_range(room.position.x + 1, room.end.x - 1)
 		var y: int = _rng.randi_range(room.position.y + 1, room.end.y - 1)
 		var new_entity_position := Vector2i(x, y)
@@ -114,33 +142,51 @@ func _place_entities(dungeon: MapData, room: Rect2i) -> void:
 				break
 		
 		if can_place:
-			var new_entity: Entity
-			if _rng.randf() < 0.8:
-				new_entity = Entity.new(dungeon, new_entity_position, entity_types.priest)
-			else:
-				new_entity = Entity.new(dungeon, new_entity_position, entity_types.crusader)
+			var new_entity := Entity.new(dungeon, new_entity_position, entity_key)
 			dungeon.entities.append(new_entity)
 
-	for _i in number_of_items:
-		var x: int = _rng.randi_range(room.position.x + 1, room.end.x - 1)
-		var y: int = _rng.randi_range(room.position.y + 1, room.end.y - 1)
-		var new_entity_position := Vector2i(x, y)
-		
-		var can_place = true
-		for entity in dungeon.entities:
-			if entity.grid_position == new_entity_position:
-				can_place = false
-				break
-		
-		if can_place:
-			var item_chance: float = _rng.randf()
-			var new_entity: Entity
-			if item_chance < 0.7:
-				new_entity = Entity.new(dungeon, new_entity_position, entity_types.health_potion)
-			elif item_chance < 0.8:
-				new_entity = Entity.new(dungeon, new_entity_position, entity_types.fireball_scroll)
-			elif item_chance < 0.9:
-				new_entity = Entity.new(dungeon, new_entity_position, entity_types.confusion_scroll)
-			else:
-				new_entity = Entity.new(dungeon, new_entity_position, entity_types.lightning_scroll)
-			dungeon.entities.append(new_entity)
+func _get_max_value_for_floor(weighted_chances_by_floor: Array, current_floor: int) -> int:
+	var current_value = 0
+	
+	for chance in weighted_chances_by_floor:
+		if chance[0] > current_floor:
+			break
+		else:
+			current_value = chance[1]
+	
+	return current_value
+
+func _get_entities_at_random(weighted_chances_by_floor: Dictionary, number_of_entities: int, current_floor: int) -> Array[String]:
+	var entity_weighted_chances = {}
+	var chosen_entities: Array[String] = []
+	
+	for key in weighted_chances_by_floor:
+		if key > current_floor:
+			break
+		else:
+			for entity_name in weighted_chances_by_floor[key]:
+				entity_weighted_chances[entity_name] = weighted_chances_by_floor[key][entity_name]
+	
+	for _i in number_of_entities:
+		chosen_entities.append(_pick_weighted(entity_weighted_chances))
+	
+	return chosen_entities
+
+func _pick_weighted(weighted_chances: Dictionary) -> String:
+	var keys: Array[String] = []
+	var cumulative_chances := []
+	var sum: int = 0
+	for key in weighted_chances:
+		keys.append(key)
+		var chance: int = weighted_chances[key]
+		sum += chance
+		cumulative_chances.append(sum)
+	var random_chance: int = _rng.randi_range(0, sum - 1)
+	var selection: String
+	
+	for i in cumulative_chances.size():
+		if cumulative_chances[i] > random_chance:
+			selection = keys[i]
+			break
+	
+	return selection

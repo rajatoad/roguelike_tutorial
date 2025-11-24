@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EntityDefinition" load_steps=6 format=3 uid="uid://bfa23pajytw8v"]
+
+[ext_resource type="Script" uid="uid://btleiotuj5nbr" path="res://src/Entities/Actors/Components/ComponentDefinitions/equippable_component_definition.gd" id="1_qoa3o"]
+[ext_resource type="Script" uid="uid://lg8nivuq53pq" path="res://src/Entities/entity_definition.gd" id="2_h08hr"]
+[ext_resource type="Texture2D" uid="uid://chgvxqjl7omrq" path="res://monochrome_packed.png" id="3_gafty"]
+
+[sub_resource type="Resource" id="Resource_p3oa0"]
+script = ExtResource("1_qoa3o")
+power_bonus = 2
+metadata/_custom_type_script = "uid://btleiotuj5nbr"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ay1v"]
+atlas = ExtResource("3_gafty")
+region = Rect2(560, 96, 16, 16)
+
+[resource]
+script = ExtResource("2_h08hr")
+name = "Dagger"
+texture = SubResource("AtlasTexture_0ay1v")
+color = Color(0.49803922, 0.49803922, 0.49803922, 1)
+is_blocking_movement = false
+type = 1
+item_definition = SubResource("Resource_p3oa0")
+metadata/_custom_type_script = "uid://lg8nivuq53pq"

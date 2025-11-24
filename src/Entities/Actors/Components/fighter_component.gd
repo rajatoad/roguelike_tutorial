@@ -13,8 +13,14 @@ var hp: int:
 				die_silently = true
 				await ready
 			die(not die_silently)
-var defense: int
-var power: int
+var base_defense: int
+var base_power: int
+var defense: int: 
+	get:
+		return base_defense + get_defense_bonus()
+var power: int: 
+	get:
+		return base_power + get_power_bonus()
 
 var death_texture: Texture
 var death_color: Color
@@ -22,8 +28,8 @@ var death_color: Color
 func _init(definition: FighterComponentDefinition) -> void:
 	max_hp = definition.max_hp
 	hp = definition.max_hp
-	defense = definition.defense
-	power = definition.power
+	base_defense = definition.defense
+	base_power = definition.power
 	death_texture = definition.death_texture
 	death_color = definition.death_color
 
@@ -44,7 +50,7 @@ func heal(amount: int) -> int:
 func take_damage(amount: int) -> void:
 	hp -= amount
 
-func die(log_message := true) -> void:
+func die(trigger_side_effects := true) -> void:
 	var death_message: String
 	var death_message_color: Color
 	
@@ -56,29 +62,40 @@ func die(log_message := true) -> void:
 		death_message = "%s is dead!" % entity.get_entity_name()
 		death_message_color = GameColors.ENEMY_DIE
 	
-	if log_message:
+	if trigger_side_effects:
 		MessageLog.send_message(death_message, death_message_color)
-	
-	MessageLog.send_message(death_message, death_message_color)
+		get_map_data().player.level_component.add_xp(entity.level_component.xp_given)
 	entity.texture = death_texture
 	entity.modulate = death_color
 	entity.ai_component.queue_free()
 	entity.ai_component = null
 	entity.entity_name = "Remains of %s" % entity.entity_name
 	entity.blocks_movement = false
-	get_map_data().unregister_blocking_entity(entity)
 	entity.type = Entity.EntityType.CORPSE
+	get_map_data().unregister_blocking_entity(entity)
+
+func get_defense_bonus() -> int:
+	if entity.equipment_component:
+		return entity.equipment_component.get_defense_bonus()
+	return 0
+
+
+func get_power_bonus() -> int:
+	if entity.equipment_component:
+		return entity.equipment_component.get_power_bonus()
+	return 0
 
 func get_save_data() -> Dictionary:
 	return {
 		"max_hp": max_hp,
 		"hp": hp,
-		"power": power,
-		"defense": defense
+		"power": base_power,
+		"defense": base_defense
 	}
+
 
 func restore(save_data: Dictionary) -> void:
 	max_hp = save_data["max_hp"]
 	hp = save_data["hp"]
-	power = save_data["power"]
-	defense = save_data["defense"]
+	base_power = save_data["power"]
+	base_defense = save_data["defense"]

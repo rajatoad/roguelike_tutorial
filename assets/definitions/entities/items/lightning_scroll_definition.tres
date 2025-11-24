@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://0fmy2j4n6dcn" path="res://src/Entities/Actors/Components/ComponentDefinitions/lightning_damage_consumable_component_definition.gd" id="1_uloyb"]
 [ext_resource type="Texture2D" uid="uid://chgvxqjl7omrq" path="res://monochrome_packed.png" id="3_3uk63"]
 
-[sub_resource type="Resource" id="Resource_87kud"]
+[sub_resource type="Resource" id="Resource_uloyb"]
 script = ExtResource("1_uloyb")
 damage = 20
 maximum_range = 5
@@ -21,5 +21,5 @@ texture = SubResource("AtlasTexture_uhn0w")
 color = Color(1, 1, 0, 1)
 is_blocking_movement = false
 type = 1
-consumable_definition = SubResource("Resource_87kud")
+item_definition = SubResource("Resource_uloyb")
 metadata/_custom_type_script = "uid://lg8nivuq53pq"

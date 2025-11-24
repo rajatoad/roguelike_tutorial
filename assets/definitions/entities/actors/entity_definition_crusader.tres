@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="EntityDefinition" load_steps=7 format=3 uid="uid://bikgnjkrptyag"]
+[gd_resource type="Resource" script_class="EntityDefinition" load_steps=9 format=3 uid="uid://bikgnjkrptyag"]
 
 [ext_resource type="Script" uid="uid://bywgry00vyjin" path="res://src/Entities/Actors/Components/ComponentDefinitions/fighter_component_definition.gd" id="1_6vamk"]
 [ext_resource type="Script" uid="uid://lg8nivuq53pq" path="res://src/Entities/entity_definition.gd" id="1_61m37"]
 [ext_resource type="Texture2D" uid="uid://b2aeajuison06" path="res://assets/resources/default_death_texture.tres" id="1_gg4s7"]
 [ext_resource type="Texture2D" uid="uid://chgvxqjl7omrq" path="res://monochrome_packed.png" id="2_c5ym0"]
+[ext_resource type="Script" uid="uid://d121gctsvpnsi" path="res://src/Entities/Actors/Components/ComponentDefinitions/level_component_definition.gd" id="3_o76iv"]
 
 [sub_resource type="Resource" id="Resource_gg4s7"]
 script = ExtResource("1_6vamk")
@@ -11,6 +12,11 @@ max_hp = 16
 power = 4
 defense = 1
 metadata/_custom_type_script = "uid://bywgry00vyjin"
+
+[sub_resource type="Resource" id="Resource_12fim"]
+script = ExtResource("3_o76iv")
+xp_given = 100
+metadata/_custom_type_script = "uid://d121gctsvpnsi"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6vamk"]
 atlas = ExtResource("2_c5ym0")
@@ -23,4 +29,5 @@ texture = SubResource("AtlasTexture_6vamk")
 color = Color(0.7472398, 0.22340974, 0.7005175, 1)
 fighter_definition = SubResource("Resource_gg4s7")
 ai_type = 1
+level_info = SubResource("Resource_12fim")
 metadata/_custom_type_script = "uid://lg8nivuq53pq"

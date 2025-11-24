@@ -1,0 +1,105 @@
+[gd_scene load_steps=16 format=3 uid="uid://g6ut5kohoiba"]
+
+[ext_resource type="Texture2D" uid="uid://chgvxqjl7omrq" path="res://monochrome_packed.png" id="1_g0l10"]
+[ext_resource type="Script" uid="uid://qawupop7061o" path="res://src/GUI/LevelUpMenu/level_up_menu.gd" id="1_x6fc4"]
+[ext_resource type="FontFile" uid="uid://b5cqfn3c7jmg2" path="res://Fonts/Kenney Pixel.ttf" id="2_x6fc4"]
+[ext_resource type="PackedScene" uid="uid://b6yotq15df7mv" path="res://src/GUI/InventorMenu/inventory_menu_item.tscn" id="3_ykw3g"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0qd4d"]
+atlas = ExtResource("1_g0l10")
+region = Rect2(768, 336, 16, 16)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_yqkux"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+texture = SubResource("AtlasTexture_0qd4d")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_4f1m1"]
+font = ExtResource("2_x6fc4")
+
+[sub_resource type="LabelSettings" id="LabelSettings_w5xa6"]
+font = ExtResource("2_x6fc4")
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_g0l10"]
+color = Color(1, 1, 1, 1)
+
+[sub_resource type="InputEventKey" id="InputEventKey_g0l10"]
+device = -1
+keycode = 65
+unicode = 97
+
+[sub_resource type="Shortcut" id="Shortcut_x6fc4"]
+events = [SubResource("InputEventKey_g0l10")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_ykw3g"]
+device = -1
+keycode = 66
+unicode = 98
+
+[sub_resource type="Shortcut" id="Shortcut_yqkux"]
+events = [SubResource("InputEventKey_ykw3g")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_x6fc4"]
+device = -1
+keycode = 67
+unicode = 99
+
+[sub_resource type="Shortcut" id="Shortcut_ykw3g"]
+events = [SubResource("InputEventKey_x6fc4")]
+
+[node name="LevelUpMenu" type="CanvasLayer"]
+script = ExtResource("1_x6fc4")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_yqkux")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Level Up"
+label_settings = SubResource("LabelSettings_4f1m1")
+
+[node name="Label2" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Congratulations! You level up! Select an attribute to increase."
+label_settings = SubResource("LabelSettings_w5xa6")
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+theme_override_styles/separator = SubResource("StyleBoxLine_g0l10")
+
+[node name="HealthUpgradeButton" parent="CenterContainer/PanelContainer/VBoxContainer" instance=ExtResource("3_ykw3g")]
+unique_name_in_owner = true
+layout_mode = 2
+shortcut = SubResource("Shortcut_x6fc4")
+
+[node name="PowerUpgradeButton" parent="CenterContainer/PanelContainer/VBoxContainer" instance=ExtResource("3_ykw3g")]
+unique_name_in_owner = true
+layout_mode = 2
+shortcut = SubResource("Shortcut_yqkux")
+
+[node name="DefenseUpgradeButton" parent="CenterContainer/PanelContainer/VBoxContainer" instance=ExtResource("3_ykw3g")]
+unique_name_in_owner = true
+layout_mode = 2
+shortcut = SubResource("Shortcut_ykw3g")
+
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/HealthUpgradeButton" to="." method="_on_health_upgrade_button_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/PowerUpgradeButton" to="." method="_on_power_upgrade_button_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/VBoxContainer/DefenseUpgradeButton" to="." method="_on_defense_upgrade_button_pressed"]
